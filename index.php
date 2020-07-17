@@ -1,3 +1,53 @@
+<?php
+    // connect to database
+    $db = mysqli_connect('127.0.0.1', 'root', '', 'ticket');
+
+    // return error if connection is unsuccessful
+    if (mysqli_connect_errno()) {
+        echo "Database connection failed with the following error: ". mysqli_connect_error();
+        die();	
+    }
+
+    // Execute this if the submit button is pressed
+    if(isset($_POST['submit'])){
+        // receive all input values from the form and sanitize against SQL injection
+        $departure = mysqli_real_escape_string($db, $_POST['departure']);
+        $arrival = mysqli_real_escape_string($db, $_POST['arrival']);
+        $trip = mysqli_real_escape_string($db, $_POST['trip']);
+        $currency = mysqli_real_escape_string($db, $_POST['currency']);
+        $time = mysqli_real_escape_string($db, $_POST['time']);
+        $date = mysqli_real_escape_string($db, $_POST['date']);
+        $ride = mysqli_real_escape_string($db, $_POST['ride']);
+
+        // check if any field is empty
+        $allFieldsArray = [$departure, $arrival, $trip, $currency, $time, $date, $ride];
+
+        // loop through the array and check if any field is empty
+        for ($field=0; $field < 7; $field++) { 
+            $currentField = $allFieldsArray[$field];
+            if ($currentField == "") {
+                echo ("<script>alert('Please fill all fields')</script>");
+                return;
+            }
+        }
+
+        // insert query
+        $query = "INSERT INTO ticket (departure, arrival, trip, currency, time, date, ride) 
+                VALUES('$departure', '$arrival', '$trip', '$currency', '$time', '$date', '$ride')";
+
+        // execute insert query
+        $executeQuery = mysqli_query($db, $query);
+
+        // Give execution feedback
+        if ($executeQuery) {
+            echo ("<script>alert('Details submitted successfully. Thank you')</script>");
+        } else {
+            echo ("<script>alert('Details not submitted')</script>");
+        }        
+    }
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +62,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
-                <form>
+                <form action="index.php" method="post" enctype="multipart/form-data">
                     <!-- departure -->
                     <div class="form-group">
                         <label for="exampleInputEmail1">Departure</label>
@@ -95,7 +145,7 @@
                         placeholder="Ride">
                     </div>
 
-                    <button type="submit" class="btn btn-default">Submit</button>
+                    <button type="submit" name="submit" class="btn btn-default">Submit</button>
                 </form>
             </div>
         </div>
